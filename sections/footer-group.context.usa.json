@@ -1,0 +1,37 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "parent": "footer-group.json",
+  "context": {
+    "market": "usa"
+  },
+  "sections": {
+    "custom_liquid_ymw6B": {
+      "type": "custom-liquid",
+      "disabled": false,
+      "settings": {
+        "custom_liquid": "<!-- Elfsight AI Chatbot | Untitled AI Chatbot -->\n<script src=\"https://elfsightcdn.com/platform.js\" async></script>\n<div class=\"elfsight-app-7ebdaf80-3e6f-4730-9162-4cdfd7567a59\" data-elfsight-app-lazy></div>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "header-0d19457e3cb91a3f00e86ab541a27607": null,
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {},
+      "block_order": [],
+      "name": "t:names.custom_liquid"
+    }
+  },
+  "order": [
+    "custom_liquid_ymw6B",
+    "footer_m9NzUG",
+    "footer_utilities_jLGE8U"
+  ]
+}

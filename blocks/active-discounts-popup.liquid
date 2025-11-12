@@ -1,0 +1,443 @@
+{% assign active_discounts_container = block.id | replace: '_', '' | downcase %}
+
+{{ 'active-discounts-popup.css' | asset_url | stylesheet_tag }}
+
+<discount-popup-{{ active_discounts_container }}
+  class="discount-popup-wrapper"
+  data-delay="{{ block.settings.popup_delay }}"
+  style="
+    --popup-background-color: {{ block.settings.popup_background_color }};
+    --popup-width: {{ block.settings.popup_width }}px;
+    --border-radius: {{ block.settings.border_radius }}px;
+    --content-padding: {{ block.settings.content_padding }}px;
+    --text-color: {{ block.settings.text_color }};
+    --title-size: {{ block.settings.title_size }}px;
+    --subtitle-size: {{ block.settings.subtitle_size }}px;
+    --discount-title-size: {{ block.settings.discount_title_size }}px;
+    --discount-description-size: {{ block.settings.discount_description_size }}px;
+    --discount-item-background: {{ block.settings.discount_item_background }};
+    --discount-item-border: {{ block.settings.discount_item_border }};
+    --discount-item-padding: {{ block.settings.discount_item_padding }}px;
+    --discount-item-radius: {{ block.settings.discount_item_radius }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="discount-popup-overlay"></div>
+
+  <div class="discount-popup">
+    <div class="discount-popup-image">
+      {% if block.settings.popup_image %}
+        <img
+          src="{{ block.settings.popup_image | image_url: width: 800 }}"
+          alt="{{ block.settings.popup_image.alt | escape }}"
+          loading="lazy"
+          width="{{ block.settings.popup_image.width }}"
+          height="{{ block.settings.popup_image.height }}"
+        >
+      {% else %}
+        <div class="discount-popup-image-placeholder">
+          {{ 'image' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="discount-popup-content">
+      <button class="discount-popup-close" aria-label="Close popup">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="discount-popup-header">
+        {% if block.settings.popup_title != blank %}
+          <h2 class="discount-popup-title">{{ block.settings.popup_title }}</h2>
+        {% endif %}
+        {% if block.settings.popup_subtitle != blank %}
+          <p class="discount-popup-subtitle">{{ block.settings.popup_subtitle }}</p>
+        {% endif %}
+      </div>
+
+      <div class="discount-popup-discounts">
+        {% for i in (1..5) %}
+          {% liquid
+            assign enabled_key = 'discount_' | append: i | append: '_enabled'
+            assign title_key = 'discount_' | append: i | append: '_title'
+            assign description_key = 'discount_' | append: i | append: '_description'
+
+            assign enabled = block.settings[enabled_key]
+            assign title = block.settings[title_key]
+            assign description = block.settings[description_key]
+          %}
+
+          {% if enabled and title != blank %}
+            <div class="discount-item">
+              <h3 class="discount-item-title">{{ title }}</h3>
+              {% if description != blank %}
+                <div class="discount-item-description">{{ description }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</discount-popup-{{ active_discounts_container }}>
+
+<script>
+  (function() {
+    class DiscountPopup{{ active_discounts_container }} extends HTMLElement {
+      constructor() {
+        super();
+        this.overlay = this.querySelector('.discount-popup-overlay');
+        this.popup = this.querySelector('.discount-popup');
+        this.closeButton = this.querySelector('.discount-popup-close');
+
+        this.delay = parseInt(this.dataset.delay) || 1000;
+        this.storageKey = 'discount-popup-{{ active_discounts_container }}-closed';
+      }
+
+      connectedCallback() {
+        if (this.hasBeenClosed()) {
+          return;
+        }
+
+        setTimeout(() => {
+          this.showPopup();
+        }, this.delay);
+
+        this.closeButton.addEventListener('click', () => {
+          this.hidePopup();
+        });
+
+        this.overlay.addEventListener('click', () => {
+          this.hidePopup();
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && this.popup.classList.contains('active')) {
+            this.hidePopup();
+          }
+        });
+      }
+
+      showPopup() {
+        this.overlay.classList.add('active');
+        this.popup.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        document.body.classList.add('popup-active');
+      }
+
+      hidePopup() {
+        this.overlay.classList.remove('active');
+        this.popup.classList.remove('active');
+        document.body.style.overflow = '';
+        document.body.classList.remove('popup-active');
+        this.markAsClosed();
+      }
+
+      hasBeenClosed() {
+        try {
+          return sessionStorage.getItem(this.storageKey) === 'true';
+        } catch (e) {
+          return false;
+        }
+      }
+
+      markAsClosed() {
+        try {
+          sessionStorage.setItem(this.storageKey, 'true');
+        } catch (e) {
+        }
+      }
+    }
+
+    customElements.define('discount-popup-{{ active_discounts_container }}', DiscountPopup{{ active_discounts_container }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Active discounts popup",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Popup settings"
+    },
+    {
+      "type": "range",
+      "id": "popup_delay",
+      "min": 0,
+      "max": 5000,
+      "step": 500,
+      "unit": "ms",
+      "label": "Delay before showing",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "popup_width",
+      "min": 400,
+      "max": 900,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Content padding",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "popup_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "popup_title",
+      "label": "Title",
+      "default": "Active Discounts"
+    },
+    {
+      "type": "textarea",
+      "id": "popup_subtitle",
+      "label": "Subtitle",
+      "default": "Check out our current promotions and save on your order!"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "popup_background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 18,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "discount_title_size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Discount title size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "discount_description_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Discount description size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Discount items style"
+    },
+    {
+      "type": "color",
+      "id": "discount_item_background",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "discount_item_border",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "range",
+      "id": "discount_item_padding",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "discount_item_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Discount 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "discount_1_enabled",
+      "label": "Enable discount 1",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "discount_1_title",
+      "label": "Title",
+      "default": "20% Off Summer Collection"
+    },
+    {
+      "type": "textarea",
+      "id": "discount_1_description",
+      "label": "Description",
+      "default": "Get 20% off all summer items. Valid until the end of the month."
+    },
+    {
+      "type": "header",
+      "content": "Discount 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "discount_2_enabled",
+      "label": "Enable discount 2",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "discount_2_title",
+      "label": "Title",
+      "default": "Free Shipping Over $50"
+    },
+    {
+      "type": "textarea",
+      "id": "discount_2_description",
+      "label": "Description",
+      "default": "Enjoy free shipping on all orders over $50. No code needed."
+    },
+    {
+      "type": "header",
+      "content": "Discount 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "discount_3_enabled",
+      "label": "Enable discount 3",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "discount_3_title",
+      "label": "Title",
+      "default": "Buy 2 Get 1 Free"
+    },
+    {
+      "type": "textarea",
+      "id": "discount_3_description",
+      "label": "Description",
+      "default": "Purchase any 2 items and get the 3rd one free. Applies to select products."
+    },
+    {
+      "type": "header",
+      "content": "Discount 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "discount_4_enabled",
+      "label": "Enable discount 4",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "discount_4_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "discount_4_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Discount 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "discount_5_enabled",
+      "label": "Enable discount 5",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "discount_5_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "discount_5_description",
+      "label": "Description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Active discounts popup"
+    }
+  ]
+}
+{% endschema %}

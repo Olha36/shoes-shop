@@ -1,0 +1,30 @@
+.view-all-button {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.view-all-button__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background-color: #000000;
+  color: #ffffff;
+  border: 0px solid #000000;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.view-all-button__link:hover {
+  background-color: #333333;
+  color: #ffffff;
+  border-color: #333333;
+}
+
+.view-all-button__text {
+  display: inline-block;
+}

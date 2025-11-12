@@ -1,0 +1,409 @@
+{% assign faq_block_id = block.id | replace: '_', '' | downcase %}
+
+{{ 'faq.css' | asset_url | stylesheet_tag }}
+
+<faq-accordion-{{ faq_block_id }}
+  class="faq-container faq-container-{{ faq_block_id }}"
+  style="
+    --section-padding: {{ block.settings.section_padding }}px;
+    --title-size: {{ block.settings.title_size }}px;
+    --title-color: {{ block.settings.title_color }};
+    --description-size: {{ block.settings.description_size }}px;
+    --description-color: {{ block.settings.description_color }};
+    --item-spacing: {{ block.settings.item_spacing }}px;
+    --item-background: {{ block.settings.item_background }};
+    --item-border-width: {{ block.settings.item_border_width }}px;
+    --item-border-color: {{ block.settings.item_border_color }};
+    --item-hover-border-color: {{ block.settings.item_hover_border_color }};
+    --item-border-radius: {{ block.settings.item_border_radius }}px;
+    --question-padding: {{ block.settings.question_padding }}px;
+    --question-size: {{ block.settings.question_size }}px;
+    --question-color: {{ block.settings.question_color }};
+    --question-hover-color: {{ block.settings.question_hover_color }};
+    --icon-color: {{ block.settings.icon_color }};
+    --answer-size: {{ block.settings.answer_size }}px;
+    --answer-color: {{ block.settings.answer_color }};
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.title != blank or block.settings.description != blank %}
+    <div class="faq-header faq-header-{{ faq_block_id }}">
+      {% if block.settings.title != blank %}
+        <h2 class="faq-title faq-title-{{ faq_block_id }}">{{ block.settings.title }}</h2>
+      {% endif %}
+      {% if block.settings.description != blank %}
+        <div class="faq-description faq-description-{{ faq_block_id }}">{{ block.settings.description }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="faq-list faq-list-{{ faq_block_id }}">
+    {% for i in (1..6) %}
+      {% liquid
+        assign question_key = 'question_' | append: i
+        assign answer_key = 'answer_' | append: i
+        assign question = block.settings[question_key]
+        assign answer = block.settings[answer_key]
+      %}
+
+      {% if question != blank and answer != blank %}
+        <div class="faq-item faq-item-{{ faq_block_id }}" data-faq-item>
+          <button
+            class="faq-question faq-question-{{ faq_block_id }}"
+            aria-expanded="false"
+            data-faq-button
+          >
+            <span class="faq-question-text faq-question-text-{{ faq_block_id }}">{{ question }}</span>
+            <span class="faq-icon faq-icon-{{ faq_block_id }}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer faq-answer-{{ faq_block_id }}" data-faq-answer>
+            <div class="faq-answer-content faq-answer-content-{{ faq_block_id }}">{{ answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</faq-accordion-{{ faq_block_id }}>
+
+<script>
+  (function() {
+    class FaqAccordion{{ faq_block_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.items = this.querySelectorAll('[data-faq-item]');
+        this.setupEventListeners();
+
+        if (this.items.length > 0 && {{ block.settings.first_item_open | json }}) {
+          this.openItem(this.items[0]);
+        }
+      }
+
+      setupEventListeners() {
+        this.items.forEach((item) => {
+          const button = item.querySelector('[data-faq-button]');
+          button.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+
+            if ({{ block.settings.allow_multiple | json }} === false) {
+              this.items.forEach((otherItem) => {
+                if (otherItem !== item) {
+                  this.closeItem(otherItem);
+                }
+              });
+            }
+
+            if (isActive) {
+              this.closeItem(item);
+            } else {
+              this.openItem(item);
+            }
+          });
+        });
+      }
+
+      openItem(item) {
+        const button = item.querySelector('[data-faq-button]');
+        item.classList.add('active');
+        button.setAttribute('aria-expanded', 'true');
+      }
+
+      closeItem(item) {
+        const button = item.querySelector('[data-faq-button]');
+        item.classList.remove('active');
+        button.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    customElements.define('faq-accordion-{{ faq_block_id }}', FaqAccordion{{ faq_block_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ accordion",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Frequently Asked Questions"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Find answers to common questions about our products and services."
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "FAQ items"
+    },
+    {
+      "type": "text",
+      "id": "question_1",
+      "label": "Question 1",
+      "default": "What is your return policy?"
+    },
+    {
+      "type": "textarea",
+      "id": "answer_1",
+      "label": "Answer 1",
+      "default": "We offer a 30-day return policy on all items. Products must be in original condition with tags attached."
+    },
+    {
+      "type": "text",
+      "id": "question_2",
+      "label": "Question 2",
+      "default": "How long does shipping take?"
+    },
+    {
+      "type": "textarea",
+      "id": "answer_2",
+      "label": "Answer 2",
+      "default": "Standard shipping typically takes 5-7 business days. Express shipping options are available at checkout."
+    },
+    {
+      "type": "text",
+      "id": "question_3",
+      "label": "Question 3",
+      "default": "Do you ship internationally?"
+    },
+    {
+      "type": "textarea",
+      "id": "answer_3",
+      "label": "Answer 3",
+      "default": "Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by location."
+    },
+    {
+      "type": "text",
+      "id": "question_4",
+      "label": "Question 4",
+      "default": "How can I track my order?"
+    },
+    {
+      "type": "textarea",
+      "id": "answer_4",
+      "label": "Answer 4",
+      "default": "Once your order ships, you'll receive a tracking number via email. You can use this to track your package."
+    },
+    {
+      "type": "text",
+      "id": "question_5",
+      "label": "Question 5",
+      "default": "What payment methods do you accept?"
+    },
+    {
+      "type": "textarea",
+      "id": "answer_5",
+      "label": "Answer 5",
+      "default": "We accept all major credit cards, PayPal, Apple Pay, and Google Pay for your convenience."
+    },
+    {
+      "type": "text",
+      "id": "question_6",
+      "label": "Question 6",
+      "default": "How do I contact customer support?"
+    },
+    {
+      "type": "textarea",
+      "id": "answer_6",
+      "label": "Answer 6",
+      "default": "You can reach our customer support team via email at support@example.com or through our contact form."
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_multiple",
+      "label": "Allow multiple items open",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "first_item_open",
+      "label": "Open first item by default",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "item_spacing",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Item spacing",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "item_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Item border radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "item_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Item border width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "item_background",
+      "label": "Item background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "item_border_color",
+      "label": "Item border color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "item_hover_border_color",
+      "label": "Item hover border color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Question"
+    },
+    {
+      "type": "range",
+      "id": "question_padding",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "question_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "question_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "question_hover_color",
+      "label": "Hover text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Answer"
+    },
+    {
+      "type": "range",
+      "id": "answer_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "answer_color",
+      "label": "Text color",
+      "default": "#666666"
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ accordion"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}
+
+
+
+

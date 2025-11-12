@@ -1,0 +1,200 @@
+{%- doc -%}
+  progress bar block
+{%- enddoc -%}
+
+{%- assign progress_bar_container = block.id | replace: '_', '' | downcase -%}
+
+<div
+  class="shipping-progress__container"
+  id="shipping-progress-{{ progress_bar_container }}"
+  data-threshold="{{ block.settings.free_shipping_threshold | times: 100 }}"
+>
+  <div class="shipping-progress__header">
+    <span class="shipping-progress__icon">{{ block.settings.icon }}</span>
+    <span>{{ block.settings.header_text }}</span>
+  </div>
+
+  <div class="shipping-progress-bar__container">
+    <div class="shipping-progress-bar__fill" data-progress-fill></div>
+  </div>
+
+  <div class="shipping-progress-bar__message" data-progress-message>
+    {{ block.settings.initial_message }}
+  </div>
+</div>
+
+<script>
+
+ document.addEventListener('DOMContentLoaded', () => {
+  const shippingContainer = document.querySelector(".shipping-progress__container");
+  const shippingMessage = document.querySelector(".shipping-progress-bar__message");
+  const shippingProgressBar = document.querySelector('.shipping-progress-bar__fill');
+  const addToCartBtn = document.querySelector('.add-to-cart-button');
+  let total;
+
+  if (!shippingContainer) return;
+
+  const threshold = parseInt(shippingContainer.dataset.threshold);
+
+  const messages = {
+    initial: "{{ block.settings.initial_message | escape }}",
+    progress: "{{ block.settings.progress_message | escape }}",
+    success: "{{ block.settings.success_message | escape }}"
+  };
+
+  async function getCartData() {
+    try {
+      const res = await fetch('/cart.js');
+      const cart = await res.json();
+      total = cart.total_price;
+      const remaining = threshold - total;
+
+      console.log(total, 'test total')
+      let percent = Math.min((total / threshold) * 100, 100);
+      shippingProgressBar.style.width = `${percent}%`;
+
+      if (percent > 0) {
+        shippingProgressBar.style.backgroundColor = "#22c55e";
+      } else {
+        shippingProgressBar.style.backgroundColor = "#e5e7eb";
+      }
+
+      if (total === 0) {
+        shippingMessage.textContent = messages.initial;
+      } else if (remaining > 0) {
+        const remainingDollars = (remaining / 100).toFixed(2);
+        shippingMessage.textContent = messages.progress.replace('[amount]', `$${remainingDollars}`);
+      } else {
+        shippingMessage.textContent = messages.success;
+      }
+    } catch (error) {
+      console.error("Progress bar error:", error);
+    }
+  }
+
+  getCartData();
+
+
+    const originalFetch = window.fetch; // sends network requests
+    window.fetch = async (...args) => {
+    const response = await originalFetch(...args);
+
+
+    const url = args[0].toString();
+    if (
+        url.includes('/cart/change') ||
+        url.includes('/cart/update') ||
+        url.includes('/cart/clear')
+    ) {
+        setTimeout(getCartData, 400);
+    }
+
+    return response;
+    };
+
+
+  if(addToCartBtn) {
+    addToCartBtn.addEventListener('click', () => {
+         console.log(total, 'threshold amount' + threshold)
+        setTimeout(getCartData, 800);
+    })
+    }
+
+  document.addEventListener('cart:updated', getCartData);
+});
+
+</script>
+
+
+
+{% stylesheet %}
+
+ .shipping-progress-bar__container {
+  width: 100%;
+  height: 10px;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.shipping-progress-bar__fill {
+  height: 100%;
+  width: 0%;
+  background: #22c55e;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.shipping-progress-bar__message {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+{% endstylesheet %}
+
+
+{% schema %}
+    {
+        "name": "Shipping progress bar",
+        "tag": null,
+        "settings": [
+            {
+                "type": "header",
+                "content": "Shipping settings"
+            },
+            {
+                "type": "range",
+                "id": "free_shipping_threshold",
+                "min": 10,
+                "max": 500,
+                "step": 5,
+                "unit": "$",
+                "label": "Free shipping threshold",
+                "default": 100
+            },
+            {
+                "type": "header",
+                "content": "Messages"
+            },
+            {
+                "type": "text",
+                "id": "icon",
+                "label": "Icon",
+                "default": "🚚"
+            },
+            {
+                "type": "text",
+                "id": "header_text",
+                "label": "Header text",
+                "default": "Free shipping for orders over $100"
+            },
+            {
+                "type": "text",
+                "id": "initial_message",
+                "label": "Initial message",
+                "default": "Add items to your cart to track progress"
+            },
+            {
+                "type": "text",
+                "id": "progress_message",
+                "label": "You are only [amount] away from free shipping!",
+            },
+            {
+                "type": "text",
+                "id": "success_message",
+                "label": "Success message",
+                "default": "🎉 You have qualified for free shipping!"
+            },
+            {
+                "type": "header",
+                "content": "style"
+            }
+        ],
+        "presets": [
+            {
+                "name": "Shipping progress bar"
+            }
+        ]
+    }
+{% endschema %}

@@ -1,0 +1,187 @@
+/* popup.css — handles popup block design using dynamic CSS variables */
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-overlay.active {
+  display: flex;
+}
+
+.bf-popup_container {
+  position: relative;
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.popup-image {
+  flex: 0 0 45%;
+  position: relative;
+  overflow: hidden;
+}
+
+.popup-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.popup-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-image-placeholder svg {
+  width: 100%;
+  height: 100%;
+  max-width: 300px;
+  max-height: 300px;
+}
+
+.popup-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: var(--text-color);
+  opacity: 0.7;
+  z-index: 10;
+}
+
+.popup-close:hover {
+  opacity: 1;
+}
+
+.popup-heading {
+  color: var(--heading-color);
+  font-size: var(--heading-size);
+  margin: 0 0 15px;
+  line-height: 1.2;
+}
+
+.popup-text {
+  color: var(--text-color);
+  font-size: var(--text-size);
+  margin: 0 0 25px;
+  line-height: 1.5;
+}
+
+.popup-countdown {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.popup-countdown-item {
+  flex: 1;
+  text-align: center;
+  background-color: var(--countdown-bg-color);
+  padding: 15px 10px;
+  border-radius: var(--countdown-border-radius);
+}
+
+.popup-countdown-value {
+  display: block;
+  font-size: var(--countdown-number-size);
+  font-weight: 700;
+  color: var(--countdown-number-color);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.popup-countdown-label {
+  display: block;
+  font-size: var(--countdown-label-size);
+  color: var(--countdown-label-color);
+  text-transform: uppercase;
+}
+
+.popup-button {
+  display: inline-block;
+  padding: 15px 30px;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  text-decoration: none;
+  border-radius: var(--button-border-radius);
+  font-size: var(--button-text-size);
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.popup-button:hover {
+  background-color: var(--button-hover-bg-color);
+}
+
+.popup-expired {
+  color: var(--text-color);
+  font-size: var(--text-size);
+  text-align: center;
+  padding: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .bf-popup_container {
+    flex-direction: column;
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+
+  .popup-image {
+    /* flex: 0 0 200px; */
+    display: none;
+  }
+
+  .popup-content {
+    padding: 30px 20px;
+  }
+
+  .popup-heading {
+    font-size: calc(var(--heading-size) * 0.8);
+  }
+
+  .popup-countdown {
+    gap: 10px;
+  }
+
+  .popup-countdown-item {
+    padding: 10px 5px;
+  }
+
+  .popup-countdown-value {
+    font-size: calc(var(--countdown-number-size) * 0.8);
+  }
+}

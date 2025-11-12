@@ -1,0 +1,397 @@
+{% assign popup_container = block.id | replace: '_', '' | downcase %}
+
+{{ 'popup.css' | asset_url | stylesheet_tag }}
+
+<black-friday-popup-{{ popup_container }}
+  class="popup-overlay popup-overlay-{{ popup_container }}"
+  style="
+    --background-color: {{ block.settings.background_color }};
+    --border-radius: {{ block.settings.border_radius }}px;
+    --heading-color: {{ block.settings.heading_color }};
+    --heading-size: {{ block.settings.heading_size }}px;
+    --text-color: {{ block.settings.text_color }};
+    --text-size: {{ block.settings.text_size }}px;
+    --countdown-bg-color: {{ block.settings.countdown_bg_color }};
+    --countdown-border-radius: {{ block.settings.countdown_border_radius }}px;
+    --countdown-number-color: {{ block.settings.countdown_number_color }};
+    --countdown-number-size: {{ block.settings.countdown_number_size }}px;
+    --countdown-label-color: {{ block.settings.countdown_label_color }};
+    --countdown-label-size: {{ block.settings.countdown_label_size }}px;
+    --button-bg-color: {{ block.settings.button_bg_color }};
+    --button-hover-bg-color: {{ block.settings.button_hover_bg_color }};
+    --button-text-color: {{ block.settings.button_text_color }};
+    --button-text-size: {{ block.settings.button_text_size }}px;
+    --button-border-radius: {{ block.settings.button_border_radius }}px;
+  "
+  data-end-date="{{ block.settings.end_date }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="bf-popup_container">
+    <div class="popup-image">
+      {% if block.settings.image %}
+        <img
+          src="{{ block.settings.image | image_url: width: 800 }}"
+          alt="{{ block.settings.image.alt | escape }}"
+          loading="lazy"
+          width="{{ block.settings.image.width }}"
+          height="{{ block.settings.image.height }}"
+        >
+      {% else %}
+        <div class="popup-image-placeholder">
+          {{ 'image' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="popup-content">
+      <button
+        class="popup-close"
+        aria-label="Close popup"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      {% if block.settings.heading != blank %}
+        <h2 class="popup-heading">{{ block.settings.heading }}</h2>
+      {% endif %}
+
+      {% if block.settings.text != blank %}
+        <div class="popup-text">{{ block.settings.text }}</div>
+      {% endif %}
+
+      <div class="popup-countdown" data-countdown>
+        <div class="popup-countdown-item">
+          <span class="popup-countdown-value" data-days>00</span>
+          <span class="popup-countdown-label">Days</span>
+        </div>
+        <div class="popup-countdown-item">
+          <span class="popup-countdown-value" data-hours>00</span>
+          <span class="popup-countdown-label">Hours</span>
+        </div>
+        <div class="popup-countdown-item">
+          <span class="popup-countdown-value" data-minutes>00</span>
+          <span class="popup-countdown-label">Mins</span>
+        </div>
+        <div class="popup-countdown-item">
+          <span class="popup-countdown-value" data-seconds>00</span>
+          <span class="popup-countdown-label">Secs</span>
+        </div>
+      </div>
+
+      <div class="popup-expired" data-expired style="display: none;">
+        {{ block.settings.expired_message }}
+      </div>
+
+      {% if block.settings.button_text != blank and block.settings.button_link != blank %}
+        <a
+          href="{{ block.settings.button_link }}"
+          class="popup-button"
+        >
+          {{ block.settings.button_text }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</black-friday-popup-{{ popup_container }}>
+
+<script>
+  (function() {
+    class BlackFridayPopup{{ popup_container }} extends HTMLElement {
+      constructor() {
+        super();
+        this.endDate = this.dataset.endDate;
+        this.countdownElement = this.querySelector('[data-countdown]');
+        this.expiredElement = this.querySelector('[data-expired]');
+        this.daysElement = this.querySelector('[data-days]');
+        this.hoursElement = this.querySelector('[data-hours]');
+        this.minutesElement = this.querySelector('[data-minutes]');
+        this.secondsElement = this.querySelector('[data-seconds]');
+        this.closeButton = this.querySelector('.popup-close');
+        this.interval = null;
+      }
+
+      connectedCallback() {
+        this.showPopup();
+        this.setupEventListeners();
+        if (this.endDate) {
+          this.startCountdown();
+        }
+      }
+
+      disconnectedCallback() {
+        if (this.interval) clearInterval(this.interval);
+      }
+
+      showPopup() {
+        const seen = sessionStorage.getItem('popup-{{ popup_container }}-seen');
+        if (!seen) {
+          setTimeout(() => {
+            this.classList.add('active');
+          }, 1000);
+        }
+      }
+
+      setupEventListeners() {
+        this.closeButton.addEventListener('click', () => this.closePopup());
+        this.addEventListener('click', (e) => {
+          if (e.target === this) this.closePopup();
+        });
+      }
+
+      closePopup() {
+        this.classList.remove('active');
+        sessionStorage.setItem('popup-{{ popup_container }}-seen', 'true');
+      }
+
+      startCountdown() {
+        this.updateCountdown();
+        this.interval = setInterval(() => this.updateCountdown(), 1000);
+      }
+
+      updateCountdown() {
+        const now = Date.now();
+        const end = new Date(this.endDate).getTime();
+        const distance = end - now;
+
+        if (distance < 0) {
+          clearInterval(this.interval);
+          this.countdownElement.style.display = 'none';
+          this.expiredElement.style.display = 'block';
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        this.daysElement.textContent = String(days).padStart(2, '0');
+        this.hoursElement.textContent = String(hours).padStart(2, '0');
+        this.minutesElement.textContent = String(minutes).padStart(2, '0');
+        this.secondsElement.textContent = String(seconds).padStart(2, '0');
+      }
+    }
+
+    customElements.define('black-friday-popup-{{ popup_container }}', BlackFridayPopup{{ popup_container }});
+  })();
+</script>
+{% schema %}
+{
+  "name": "Black Friday popup",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Black Friday Sale"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Get up to 50% off on selected items. Limited time only!</p>"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date and time",
+      "info": "Format: YYYY-MM-DD HH:MM:SS (e.g., 2025-11-29 23:59:59)"
+    },
+    {
+      "type": "richtext",
+      "id": "expired_message",
+      "label": "Expired message",
+      "default": "<p>This offer has ended. Check back for future promotions!</p>"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 36
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Countdown"
+    },
+    {
+      "type": "color",
+      "id": "countdown_bg_color",
+      "label": "Background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "countdown_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "countdown_number_color",
+      "label": "Number color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "countdown_number_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Number size",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "countdown_label_color",
+      "label": "Label color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "countdown_label_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Label size",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Hover background color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Black Friday popup"
+    }
+  ]
+}
+{% endschema %}

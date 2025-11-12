@@ -1,0 +1,180 @@
+.discount-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.discount-popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.discount-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  z-index: 9999;
+  display: flex;
+  flex-direction: row;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  background-color: var(--popup-background-color, #ffffff);
+  border-radius: var(--border-radius, 16px);
+  max-width: var(--popup-width, 700px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.discount-popup.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.discount-popup-image {
+  flex: 0 0 40%;
+  position: relative;
+  overflow: hidden;
+}
+
+.discount-popup-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discount-popup-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discount-popup-image-placeholder svg {
+  width: 100%;
+  height: 100%;
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.discount-popup-content {
+  flex: 1;
+  padding: var(--content-padding, 40px);
+  overflow-y: auto;
+  position: relative;
+}
+
+.discount-popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--text-color, #000000);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.discount-popup-close:hover {
+  opacity: 1;
+}
+
+.discount-popup-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+.discount-popup-header {
+  margin-bottom: 24px;
+  padding-right: 40px;
+}
+
+.discount-popup-title {
+  font-size: var(--title-size, 32px);
+  font-weight: 700;
+  color: var(--text-color, #000000);
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+
+.discount-popup-subtitle {
+  font-size: var(--subtitle-size, 16px);
+  color: var(--text-color, #000000);
+  opacity: 0.8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.discount-popup-discounts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.discount-item {
+  padding: var(--discount-item-padding, 20px);
+  background-color: var(--discount-item-background, #f5f5f5);
+  border-radius: var(--discount-item-radius, 8px);
+  border: 1px solid var(--discount-item-border, #e6e6e6);
+}
+
+.discount-item-title {
+  font-size: var(--discount-title-size, 18px);
+  font-weight: 600;
+  color: var(--text-color, #000000);
+  margin: 0 0 8px;
+}
+
+.discount-item-description {
+  font-size: var(--discount-description-size, 14px);
+  color: var(--text-color, #000000);
+  opacity: 0.8;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media screen and (max-width: 768px) {
+  .discount-popup {
+    flex-direction: column;
+    max-height: 85vh;
+  }
+
+  .discount-popup-image {
+    flex: 0 0 200px;
+    min-height: 200px;
+  }
+
+  .discount-popup-content {
+    padding: calc(var(--content-padding, 40px) * 0.75);
+  }
+
+  .discount-popup-title {
+    font-size: calc(var(--title-size, 32px) * 0.85);
+  }
+
+  .discount-popup-subtitle {
+    font-size: calc(var(--subtitle-size, 16px) * 0.9);
+  }
+}
+
+@media screen and (max-width: 425px) {
+    .discount-popup-image {
+        display: none;
+    }
+}

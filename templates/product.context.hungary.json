@@ -1,0 +1,45 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "parent": "product.json",
+  "context": {
+    "market": "hungary"
+  },
+  "sections": {
+    "main": {
+      "settings": {},
+      "blocks": {
+        "media-gallery": {
+          "settings": {
+            "media_presentation": "carousel",
+            "slideshow_mobile_controls_style": "dots"
+          }
+        },
+        "product-details": {
+          "blocks": {},
+          "block_order": [
+            "group_icgrde",
+            "variant_picker_R3rGDr",
+            "subscriptions_app_block_RMe3NP",
+            "buy_buttons_eYQEYi",
+            "accordion_MxEd8m",
+            "text_aEtTtq"
+          ],
+          "settings": {}
+        }
+      }
+    },
+    "1762328182d9f3821b": {
+      "disabled": false,
+      "settings": {},
+      "blocks": {}
+    }
+  }
+}

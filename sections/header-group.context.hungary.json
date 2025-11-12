@@ -1,0 +1,92 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "parent": "header-group.json",
+  "context": {
+    "market": "hungary"
+  },
+  "sections": {
+    "1762348196ef181be1": {
+      "type": "_blocks",
+      "disabled": false,
+      "settings": {
+        "header-c2a0eb4ae714d90a6b660ecadb842fb2": null,
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "space-between",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "space-between",
+        "gap": 12,
+        "header-331d1523013c79916a54c2524a648d7e": null,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "header-dc4cbe4961d536cc545bf38c9431daf4": null,
+        "color_scheme": "scheme-3",
+        "background_media": "none",
+        "video": null,
+        "video_position": "cover",
+        "background_image": null,
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": true,
+        "overlay_color": "#000000",
+        "overlay_style": "gradient",
+        "gradient_direction": "to bottom",
+        "header-6f2d68149f02abf83b4b1cb96e0e80c9": null,
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {
+        "promo_code": {
+          "type": "promo-hu",
+          "disabled": false,
+          "settings": {
+            "header-0859fee45fce58b1b245a7bd5eecc2fe": null,
+            "promo_text": "Különleges ajánlat Magyarország számára!",
+            "promo_code": "HUNGARY10",
+            "header-536b95812e754f16b302102edfa71b7b": null,
+            "text_color": "#ffffff",
+            "text_size": 20,
+            "code_background": "#ffffff",
+            "code_text_color": "#000000",
+            "code_border_color": "#a7a7a7",
+            "code_size": 17,
+            "border_radius": 8,
+            "background_gradient_color": "rgba(0,0,0,0)"
+          }
+        }
+      },
+      "block_order": [
+        "promo_code"
+      ]
+    },
+    "header_announcements_9jGBFp": {
+      "settings": {},
+      "blocks": {
+        "announcement_BxgCk9": {
+          "settings": {
+            "text": "Üdvözlünk áruházunkban"
+          }
+        }
+      }
+    }
+  },
+  "order": [
+    "1762348196ef181be1",
+    "header_announcements_9jGBFp",
+    "header_section"
+  ]
+}
